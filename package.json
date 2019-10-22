@@ -1,0 +1,25 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "Node.Js and MySQL assignment",
+  "main": "bamazonCusomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/armonkahil/Bamazon.git"
+  },
+  "author": "Armon Roberts",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/armonkahil/Bamazon/issues"
+  },
+  "homepage": "https://github.com/armonkahil/Bamazon#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "gradient-string": "^1.2.0",
+    "inquirer": "^7.0.0",
+    "mysql": "^2.17.1"
+  }
+}
