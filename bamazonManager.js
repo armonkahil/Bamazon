@@ -16,6 +16,10 @@ const inquirer = require('inquirer')
 const gateKey = keys.mysql_db
 // var to require table package
 const Table = require('cli-table')
+const chalk = require('chalk')
+const normal = chalk.hex('#F58148')
+const amy = chalk.hex('#AEBD44')
+
 // =============================================================================
 // Global Variables
 // =============================================================================
@@ -34,36 +38,64 @@ const connection = mysql.createConnection({
 })
 // var to hold inventory
 let inventory = []
+// var to hold banner
 const display = '*****************************************'
-const banner = '\n' + display + '  Manager Access  ' + display
-const headerColor = 'yellow'
-const borderColor = 'green'
+const banner = '\n\n' + display + '  Manager Access  ' + display
+// =============================================================================
+// Table variables
+// =============================================================================
+const headerColor = 'white'
+const borderColor = 'blue'
+const tableKey = {
+  style: { head: [headerColor], border: [borderColor] },
+  head: ['Item Id', 'Name', 'Console', 'Price', 'Quantity'],
+  colWidths: [9, 50, 15, 10, 10]
+}
+
 connection.connect(function (err) {
   if (err) throw err
   console.log(gradient.vice('connected as id ' + connection.threadId + '\n'))
   ask()
 })
 
+function buildtable (data, store) {
+  for (var i = 0; i < data.length; i++) {
+    store.push([data[i].item_id, data[i].product_name, data[i].department_name, data[i].price, data[i].stock_quantity])
+    inventory.push(data[i].item_id)
+  }
+  console.log(normal(banner))
+  console.log(normal(store.toString() + '\n'))
+}
+// function to display table
+
 function displayProducts () {
-  var table = new Table({
-    style: { head: [headerColor], border: [borderColor] },
-    head: ['Item Id', 'Name', 'Console', 'Price', 'Quantity'],
-    colWidths: [9, 50, 15, 10, 10]
-  })
+  // var to reset table variable
+  var table = new Table(tableKey)
+  // reset inventory array
   inventory = []
-  console.log('Selecting all products...\n')
+  console.log(gradient.vice('\nConnecting to store...'))
+  // mysql connection
   connection.query('SELECT * FROM products', function (err, result) {
     if (err) throw err
-    // Log all results of the SELECT statement
-    for (var i = 0; i < result.length; i++) {
-      table.push([result[i].item_id, result[i].product_name, result[i].department_name, result[i].price, result[i].stock_quantity])
-      inventory.push(result[i].item_id)
-    }
-    console.log(gradient.vice(banner))
-    console.log(table.toString())
+    buildtable(result, table)
+    ask()
+  })
+}
+function newProductDisplay () {
+  // var to reset table variable
+  var table = new Table(tableKey)
+  // reset inventory array
+  inventory = []
+  console.log(gradient.vice('\nConnecting to store...\n'))
+  // mysql connection
+  connection.query('SELECT * FROM products', function (err, result) {
+    if (err) throw err
+    buildtable(result, table)
+    newInventory()
   })
 }
 
+// update database function
 function updateProducts (product, newQuant) {
   connection.query('UPDATE products SET ? WHERE ?',
     [
@@ -76,66 +108,58 @@ function updateProducts (product, newQuant) {
     ],
     function (error, newResult) {
       if (error) throw error
-      console.log(gradient.vice(newResult.affectedRows + ' products have been added!!\n'))
       displayProducts()
+      console.log(normal('\n' + newResult.affectedRows + ' products updated!!\n'))
     }
   )
 }
 
-// function to ask whether to start next game
-function nextGame () {
-  // use inquirer to confirm continued play
+// function to ask whether to start continue
+function keepGoing () {
   inquirer.prompt([
     {
       type: 'confirm',
-      message: gradient.vice('Would you like to make another purchase?\n'),
+      message: normal('Are you sure?\n'),
       name: 'confirm',
-      default: true
-    }]).then(function (foolish) {
-    // if foolish enough to keep playing
-    if (foolish.confirm) {
-      displayProducts()
+      default: false
+    }]).then(function (again) {
+    // if confirmed
+    if (again.confirm) {
+      ask()
     } else {
-      // if not foolish, let player down as easily as possible
+      // if not
       console.log(gradient.fruit('\nThank you coming'))
       connection.end()
     }
   })
 }
 
+// low inventory function
 function lowInventory () {
-  var lowTable = new Table({
-    style: { head: [headerColor], border: [borderColor] },
-    head: ['Item Id', 'Name', 'Console', 'Price', 'Quantity'],
-    colWidths: [9, 50, 15, 10, 10]
-  })
+  // reset table variable
+  var lowTable = new Table(tableKey)
   connection.query('SELECT * FROM products WHERE stock_quantity < 5', function (error, result) {
     if (error) throw error
-    for (var i = 0; i < result.length; i++) {
-      lowTable.push([result[i].item_id, result[i].product_name, result[i].department_name, result[i].price, result[i].stock_quantity])
-      inventory.push(result[i].item_id)
-    }
-    console.log(gradient.vice(banner))
-    console.log(lowTable.toString())
+    buildtable(result, lowTable)
     ask()
   })
 }
 
+// function to order new stock
 function newInventory () {
-  displayProducts()
   inquirer.prompt([
     {
       type: 'input',
-      message: gradient.vice('What is the ITEM ID of the product you would like to add?'),
+      message: normal('What is the ITEM ID of the product you would like to add?'),
       name: 'itemID',
       validate: function (value) {
-        // Force customer to enter only item ids
+        // Force manager to enter only item ids
         return inventory.includes(parseFloat(value))
       }
     },
     {
       type: 'input',
-      message: gradient.vice('How many units of the products would you like to add?'),
+      message: normal('How many units of the products would you like to add?'),
       name: 'itemQuantity',
       validate: function (value) {
         var valid = !isNaN(parseFloat(value))
@@ -168,18 +192,18 @@ function newProduct () {
   inquirer.prompt([
     {
       type: 'input',
-      message: gradient.vice('What is the name?'),
+      message: normal('What is the name?'),
       name: 'itemName'
     },
     {
       type: 'list',
-      message: gradient.vice('What department?'),
+      message: normal('What department?'),
       name: 'itemDepartment',
       choices: ['Xbox One', 'Playstation 4', 'Nintendo Switch', 'PC-LOL!']
     },
     {
       type: 'input',
-      message: gradient.vice('What is the price?'),
+      message: normal('What is the price?'),
       name: 'itemPrice',
       validate: function (value) {
         var valid = !isNaN(parseFloat(value))
@@ -189,7 +213,7 @@ function newProduct () {
     },
     {
       type: 'input',
-      message: gradient.vice('How many units of the products would you like to add?'),
+      message: normal('How many units of the products would you like to add?'),
       name: 'itemQuantity',
       validate: function (value) {
         var valid = !isNaN(parseFloat(value))
@@ -206,19 +230,18 @@ function menuOptions (choice) {
   switch (choice) {
     case 'View Products for Sale':
       displayProducts()
-      ask()
       break
     case 'View Low Inventory':
       lowInventory()
-      ask()
       break
     case 'Add to Inventory':
-      newInventory()
-      ask()
+      newProductDisplay()
       break
     case 'Add New Product':
       newProduct()
       break
+    case 'Quit':
+      keepGoing()
   }
 }
 
@@ -227,9 +250,9 @@ function ask () {
   inquirer.prompt([
     {
       type: 'list',
-      message: gradient.vice('What is the ITEM ID of the product you would like to buy?'),
+      message: normal('Manager Menu'),
       name: 'options',
-      choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product']
+      choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product', 'Quit']
     }
   ]).then(function (answer) {
     menuOptions(answer.options)

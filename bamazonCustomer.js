@@ -16,6 +16,9 @@ const inquirer = require('inquirer')
 const gateKey = keys.mysql_db
 // var to require table package
 const Table = require('cli-table')
+// var to require chalk
+const chalk = require('chalk')
+const normal = chalk.hex('#FF8800')
 // =============================================================================
 // Global Variables
 // =============================================================================
@@ -34,19 +37,35 @@ const connection = mysql.createConnection({
 })
 // var to hold inventory
 let inventory = []
-let inStock = []
+// var to hold banner
 const display = '**************************************'
 const banner = '\n' + display + '  Welcome to Bamazon!!  ' + display
+// =============================================================================
+// table variables
+// =============================================================================
 const headerColor = 'yellow'
 const borderColor = 'green'
+const tableKey = {
+  style: { head: [headerColor], border: [borderColor] },
+  head: ['Item Id', 'Name', 'Console', 'Price', 'Quantity'],
+  colWidths: [9, 50, 15, 10, 10]
+}
+const updatedtableKey = {
+  style: { head: [headerColor], border: [borderColor] },
+  head: ['Name', 'Console', 'Price', 'Quantity', 'Total'],
+  colWidths: [50, 15, 10, 10, 9]
+}
+
 connection.connect(function (err) {
   if (err) throw err
   console.log(gradient.vice('connected as id ' + connection.threadId + '\n'))
+ 
+  // start app
+  start()
 })
-
+// Custom logo display function
 function logo () {
   fs.readFile('logo.txt', 'utf8', function (error, banner) {
-    // If the code experiences any errors it will log the error to the console.
     if (error) {
       return console.log(error)
     }
@@ -55,32 +74,36 @@ function logo () {
   })
 }
 
+// function to display data in a table
 function displayProducts () {
-  var table = new Table({
-    style: { head: [headerColor], border: [borderColor] },
-    head: ['Item Id', 'Name', 'Console', 'Price', 'Quantity'],
-    colWidths: [9, 50, 15, 10, 10]
-  })
+  // var to reset table variable
+  var table = new Table(tableKey)
+  // var to reset inventory array
   inventory = []
-  console.log('Selecting all products...\n')
+  console.log(gradient.vice('\nConnecting to store...\n'))
+  // mysql connection
   connection.query('SELECT * FROM products', function (err, result) {
     if (err) throw err
-    // Log all results of the SELECT statement
     for (var i = 0; i < result.length; i++) {
+      // push data to Table constructor
       table.push([result[i].item_id, result[i].product_name, result[i].department_name, result[i].price, result[i].stock_quantity])
+      // push item id in array for validation in prompts
       inventory.push(result[i].item_id)
     }
+    // display banner
     console.log(gradient.vice(banner))
-    console.log(table.toString())
-    console.log(gradient.vice('Press any key to continue'))
+    // display table
+    console.log(table.toString() + '\n')
     ask()
   })
 }
 
+// update database function
 function updateProducts (product, newQuant, oldQuant) {
   connection.query('UPDATE products SET ? WHERE ?',
     [
       {
+        // update database quantity with new quantity
         stock_quantity: newQuant
       },
       {
@@ -89,26 +112,23 @@ function updateProducts (product, newQuant, oldQuant) {
     ],
     function (error, newResult) {
       if (error) throw error
-      console.log(gradient.vice(newResult.affectedRows + ' products updated!!\n'))
+      console.log(gradient.vice('\n' + newResult.affectedRows + ' products updated!!\n'))
       displayPurchase(product, oldQuant)
     }
   )
 }
 
+// function to display purchase information
 function displayPurchase (product, quantity) {
-  var updatedTable = new Table({
-    style: { head: [headerColor], border: [borderColor] },
-    head: ['Name', 'Console', 'Price', 'Quantity', 'Total'],
-    colWidths: [50, 15, 10, 10, 15]
-  })
+  var updatedTable = new Table(updatedtableKey)
   connection.query('SELECT * FROM products WHERE item_id=?', [product], function (error, result) {
     if (error) throw error
     var cost = (result[0].price * quantity).toFixed(2)
     updatedTable.push([result[0].product_name, result[0].department_name, result[0].price, result[0].stock_quantity, cost])
     console.log(gradient.vice('Your purchase'))
-    console.log(updatedTable.toString())
+    console.log(updatedTable.toString() + '\n')
     console.log(gradient.vice('Total purchase = $' + cost))
-    nextGame()
+    keepGoing()
   })
 }
 
@@ -117,28 +137,28 @@ function purchasing (product, quant) {
     if (error) throw error
     if (quant > result[0].stock_quantity) {
       console.log(gradient.summer('Insufficient Quantity!!'))
-      nextGame()
+      keepGoing()
     } else {
       var newQuant = result[0].stock_quantity - quant
       updateProducts(product, newQuant, quant)
     }
   })
 }
-// function to ask whether to start next game
-function nextGame () {
-  // use inquirer to confirm continued play
+
+// function to ask whether to start continue
+function keepGoing () {
   inquirer.prompt([
     {
       type: 'confirm',
       message: gradient.vice('Would you like to make another purchase?\n'),
       name: 'confirm',
       default: true
-    }]).then(function (foolish) {
-    // if foolish enough to keep playing
-    if (foolish.confirm) {
+    }]).then(function (again) {
+    // if confirmed
+    if (again.confirm) {
       displayProducts()
     } else {
-      // if not foolish, let player down as easily as possible
+      // if not
       console.log(gradient.fruit('\nThank you coming'))
       connection.end()
     }
@@ -162,6 +182,7 @@ function ask () {
       message: gradient.vice('How many units of the products would you like to buy?'),
       name: 'saleQuantity',
       validate: function (value) {
+        // Force customer to enter a number
         var valid = !isNaN(parseFloat(value))
         return valid || 'Please enter a number'
       },
@@ -177,5 +198,3 @@ function start () {
   // logo()
   displayProducts()
 }
-// start app
-start()
