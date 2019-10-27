@@ -38,6 +38,8 @@ const connection = mysql.createConnection({
 })
 // var to hold inventory
 let inventory = []
+
+let deptArray = []
 // var to hold banner
 const display = '*****************************************'
 const banner = '\n\n' + display + '  Manager Access  ' + display
@@ -55,13 +57,25 @@ const tableKey = {
 connection.connect(function (err) {
   if (err) throw err
   console.log(gradient.vice('connected as id ' + connection.threadId + '\n'))
+  buildDept()
   ask()
 })
+function buildDept () {
+  connection.query('SELECT B.department_id, A.department_name, B.over_head_costs, SUM(A.product_sales) AS Sales, SUM(A.product_sales) - B.over_head_costs AS Profit FROM products A, departments B WHERE A.department_name = B.department_name GROUP BY department_name ORDER by department_id', function (err, result) {
+    if (err) throw err
+    for (var i = 0; i < result.length; i++) {
+      deptArray.push(result[i].department_name)
+    }
+  })
+}
 
 function buildtable (data, store) {
   for (var i = 0; i < data.length; i++) {
     store.push([data[i].item_id, data[i].product_name, data[i].department_name, data[i].price, data[i].stock_quantity])
     inventory.push(data[i].item_id)
+    if (!deptArray.includes(data[i].department_name)) {
+      deptArray.push(data[i].department_name)
+    }
   }
   console.log(normal(banner))
   console.log(normal(store.toString() + '\n'))
@@ -73,6 +87,7 @@ function displayProducts () {
   var table = new Table(tableKey)
   // reset inventory array
   inventory = []
+  deptArray = []
   console.log(gradient.vice('\nConnecting to store...'))
   // mysql connection
   connection.query('SELECT * FROM products', function (err, result) {
@@ -178,7 +193,8 @@ function createProduct (newProduct) {
       product_name: newProduct.itemName,
       department_name: newProduct.itemDepartment,
       price: newProduct.itemPrice,
-      stock_quantity: newProduct.itemQuantity
+      stock_quantity: newProduct.itemQuantity,
+      product_sales: 0
     },
     function (error, result) {
       if (error) throw error
@@ -199,7 +215,7 @@ function newProduct () {
       type: 'list',
       message: normal('What department?'),
       name: 'itemDepartment',
-      choices: ['Xbox One', 'Playstation 4', 'Nintendo Switch', 'PC-LOL!']
+      choices: deptArray
     },
     {
       type: 'input',

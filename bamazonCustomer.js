@@ -59,7 +59,6 @@ const updatedtableKey = {
 connection.connect(function (err) {
   if (err) throw err
   console.log(gradient.vice('connected as id ' + connection.threadId + '\n'))
- 
   // start app
   start()
 })
@@ -99,12 +98,13 @@ function displayProducts () {
 }
 
 // update database function
-function updateProducts (product, newQuant, oldQuant) {
+function updateProducts (product, newQuant, oldQuant, sales) {
   connection.query('UPDATE products SET ? WHERE ?',
     [
       {
         // update database quantity with new quantity
-        stock_quantity: newQuant
+        stock_quantity: newQuant,
+        product_sales: sales
       },
       {
         item_id: product
@@ -140,7 +140,8 @@ function purchasing (product, quant) {
       keepGoing()
     } else {
       var newQuant = result[0].stock_quantity - quant
-      updateProducts(product, newQuant, quant)
+      var sales = result[0].price + (result[0].price * quant)
+      updateProducts(product, newQuant, quant, sales)
     }
   })
 }

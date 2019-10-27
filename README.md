@@ -49,3 +49,13 @@ An Amazon-like storefront with Node.js and MySQL. This app will take in orders f
 ***
 ***
 ## bamazonSupervisor
+![Supervisor Menu](assets/images/Capture11.PNG)
+
+### View Product Sales by Department
+![Sales by Department](assets/images/Capture12.PNG)
+
+### Create New Department
+![Create New Department](assets/images/Capture13.PNG)
+
+### Quit
+![Quit](assets/images/Capture10.PNG)
