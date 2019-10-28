@@ -1,16 +1,18 @@
 ![Bamazon Logo](assets/images/Capture.PNG)
 # Welcome to Bamazon
-##### Node.js and MySQL assignment
-An Amazon-like storefront with Node.js and MySQL. This app will take in orders from customers and deplete stock from the store's inventory. As a bonus task, you can program your app to track product sales across your store's departments and then provide a summary of the highest-grossing departments in the store.
 
-## Technologies Used
-    - Node.js
+##### Node.js and MySQL assignment
+An Amazon-like storefront with **Node.js** and **MySQL**. This app will take in orders from customers and deplete stock from the store's inventory. As a bonus task, you can program your app to track product sales across your store's departments and then provide a summary of the highest-grossing departments in the store. The items used in the store are actual prices from Amazon and Best Buy. I sure *miss* the days when a Gameboy game was $30. :open_mouth:
+
+##  - Technologies Used:
+    - Node.console.log('js:', js)
     - MySQL
     - Gradient-string
     - Chalk
     - Cli-table
     - Inquirer
     - ESlint Syntax
+
 ### Early versions of the app
 ![Early Versions](https://media3.giphy.com/media/14sIKFLfUEeCti/source.gif)
 
@@ -48,7 +50,7 @@ An Amazon-like storefront with Node.js and MySQL. This app will take in orders f
 ![Quit](assets/images/Capture10.PNG)
 ***
 ***
-## bamazonSupervisor
+## bamazonSupervisor.js
 ![Supervisor Menu](assets/images/Capture11.PNG)
 
 ### View Product Sales by Department

@@ -8,17 +8,16 @@ const mysql = require('mysql')
 const keys = require('./keys.js')
 // var to require gradient string package
 const gradient = require('gradient-string')
-// var to require file system package
-const fs = require('fs')
 // var to require inquirer package
 const inquirer = require('inquirer')
-// var to hold password
-const gateKey = keys.mysql_db
 // var to require table package
-const Table = require('cli-table')
+const Table = require('cli-table')// var to hold password
+// var to require chalk package
 const chalk = require('chalk')
+// var for to hold login credentials
+const gateKey = keys.mysql_db
+// var for text color
 const normal = chalk.hex('#F58148')
-const amy = chalk.hex('#AEBD44')
 
 // =============================================================================
 // Global Variables
@@ -69,7 +68,6 @@ function buildtable (result, store) {
   console.log(normal(store.toString() + '\n'))
 }
 // function to display table
-
 function displayProducts () {
   // var to reset table variable
   var table = new Table(tableKey)

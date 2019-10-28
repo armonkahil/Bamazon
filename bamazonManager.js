@@ -60,6 +60,7 @@ connection.connect(function (err) {
   buildDept()
   ask()
 })
+// this function is used to build department array used in inquirer prompts for the create products function
 function buildDept () {
   connection.query('SELECT B.department_id, A.department_name, B.over_head_costs, SUM(A.product_sales) AS Sales, SUM(A.product_sales) - B.over_head_costs AS Profit FROM products A, departments B WHERE A.department_name = B.department_name GROUP BY department_name ORDER by department_id', function (err, result) {
     if (err) throw err
@@ -81,7 +82,6 @@ function buildtable (data, store) {
   console.log(normal(store.toString() + '\n'))
 }
 // function to display table
-
 function displayProducts () {
   // var to reset table variable
   var table = new Table(tableKey)
