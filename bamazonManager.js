@@ -18,7 +18,6 @@ const gateKey = keys.mysql_db
 const Table = require('cli-table')
 const chalk = require('chalk')
 const normal = chalk.hex('#F58148')
-const amy = chalk.hex('#AEBD44')
 
 // =============================================================================
 // Global Variables
@@ -143,7 +142,7 @@ function keepGoing () {
       ask()
     } else {
       // if not
-      console.log(gradient.fruit('\nThank you coming'))
+      console.log(gradient.fruit('\nYou are replaceable!!'))
       connection.end()
     }
   })
@@ -263,6 +262,7 @@ function menuOptions (choice) {
 
 // ask user what they want to do.
 function ask () {
+  console.log(normal("Message from management \n   - Meet your quota or you're fired!!!\n"))
   inquirer.prompt([
     {
       type: 'list',
