@@ -22,6 +22,6 @@
     "dotenv": "^8.2.0",
     "gradient-string": "^1.2.0",
     "inquirer": "^7.0.0",
-    "mysql": "^2.17.1"
+    "mysql": "^2.18.1"
   }
 }
