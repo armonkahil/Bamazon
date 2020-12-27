@@ -18,7 +18,7 @@
   "homepage": "https://github.com/armonkahil/Bamazon#readme",
   "dependencies": {
     "chalk": "^2.4.2",
-    "cli-table": "^0.3.1",
+    "cli-table": "^0.3.4",
     "dotenv": "^8.2.0",
     "gradient-string": "^1.2.0",
     "inquirer": "^7.0.0",
